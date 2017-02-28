@@ -6,7 +6,6 @@ augment the test suite with your own test cases to further test your code.
 You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
-import random
 
 
 class Timeout(Exception):
@@ -172,8 +171,23 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        legal_moves = game.get_legal_moves(game.active_player)
+        if depth == 1:
+            if maximizing_player:
+                scr, mv = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
+            else:
+                scr, mv = min([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
+        else:
+            if maximizing_player:
+                scr, mv = max(
+                    [(self.minimax(game.forecast_move(m), depth - 1, not maximizing_player)[0], m) for m in
+                     legal_moves])
+            else:
+                scr, mv = min(
+                    [(self.minimax(game.forecast_move(m), depth - 1, not maximizing_player)[0], m) for m in
+                     legal_moves])
+
+        return scr, mv
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
@@ -216,5 +230,32 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        legal_moves = game.get_legal_moves(game.active_player)
+        if depth == 1:
+            if maximizing_player:
+                scr, mv = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
+            else:
+                scr, mv = min([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
+        else:
+            if maximizing_player:
+                scr = float('-inf')
+                for m in legal_moves:
+                    scr_local, _ = self.alphabeta(game.forecast_move(m), depth - 1, alpha, beta, not maximizing_player)
+                    if scr_local >= scr:
+                        scr = scr_local
+                        mv = m
+                    alpha = max(alpha, scr)
+                    if scr >= beta:
+                        break
+            else:
+                scr = float('inf')
+                for m in legal_moves:
+                    mv = m
+                    scr_local, _ = self.alphabeta(game.forecast_move(m), depth - 1, alpha, beta, not maximizing_player)
+                    if scr <= scr_local:
+                        scr = scr_local
+                        mv = m
+                    beta = min(beta, scr)
+                    if scr <= alpha:
+                        break
+        return scr, mv

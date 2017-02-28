@@ -7,23 +7,21 @@ interface, but cannot be automatically assessed for correctness.
 STUDENTS SHOULD NOT NEED TO MODIFY THIS CODE.  IT WOULD BE BEST TO TREAT THIS
 FILE AS A BLACK BOX FOR TESTING.
 """
-import random
-import unittest
-import timeit
 import sys
-
-import isolation
-import game_agent
-
+import timeit
+import unittest
 from collections import Counter
-from copy import deepcopy
 from copy import copy
+from copy import deepcopy
 from functools import wraps
-from queue import Queue
-from threading import Thread
+from importlib import reload
 from multiprocessing import TimeoutError
 from queue import Empty as QueueEmptyError
-from importlib import reload
+from queue import Queue
+from threading import Thread
+
+import game_agent
+import isolation
 
 WRONG_MOVE = """
 The {} function failed because it returned a non-optimal move at search depth {}.
@@ -99,7 +97,7 @@ def timeout(time_limit):
                 p = Thread(target=handler, args=(self, testcase, queue))
                 p.daemon = True
                 p.start()
-                err, res = queue.get(timeout=time_limit)
+                err, res = queue.get()
                 p.join()
                 if err:
                     raise err[0](err[1]).with_traceback(err[2])
@@ -228,7 +226,7 @@ class Project1Test(unittest.TestCase):
         return agentUT, board
 
     @timeout(5)
-    # @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
+    @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
     def test_heuristic(self):
         """ Test output interface of heuristic score function interface."""
 
@@ -244,7 +242,8 @@ class Project1Test(unittest.TestCase):
             "The heuristic function should return a floating point")
 
     timeout(5)
-    # @unittest.skip("Skip simple minimax test.")  # Uncomment this line to skip test
+
+    @unittest.skip("Skip simple minimax test.")  # Uncomment this line to skip test
     def test_minimax_interface(self):
         """ Test CustomPlayer.minimax interface with simple input """
         h, w = 7, 7  # board size
@@ -275,7 +274,8 @@ class Project1Test(unittest.TestCase):
                              "branch being searched."))
 
     timeout(5)
-    # @unittest.skip("Skip alphabeta test.")  # Uncomment this line to skip test
+
+    @unittest.skip("Skip alphabeta test.")  # Uncomment this line to skip test
     def test_alphabeta_interface(self):
         """ Test CustomPlayer.alphabeta interface with simple input """
         h, w = 9, 9  # board size
@@ -306,7 +306,7 @@ class Project1Test(unittest.TestCase):
                              "branch being searched."))
 
     @timeout(5)
-    # @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
+    @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
     def test_get_move_interface(self):
         """ Test CustomPlayer.get_move interface with simple input """
         h, w = 9, 9  # board size
@@ -358,7 +358,7 @@ class Project1Test(unittest.TestCase):
                        "on the current game board."))
 
     @timeout(5)
-    # @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
+    @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
     def test_minimax(self):
         """ Test CustomPlayer.minimax
 
@@ -478,7 +478,7 @@ class Project1Test(unittest.TestCase):
 
 
     @timeout(20)
-    # @unittest.skip("Skip iterative deepening test.")  # Uncomment this line to skip test
+    @unittest.skip("Skip iterative deepening test.")  # Uncomment this line to skip test
     def test_get_move(self):
         """ Test iterative deepening in CustomPlayer.get_move by placing an
         agent on the game board and performing ID minimax search, which
