@@ -240,22 +240,26 @@ class CustomPlayer:
             if maximizing_player:
                 scr = float('-inf')
                 for m in legal_moves:
-                    scr_local, _ = self.alphabeta(game.forecast_move(m), depth - 1, alpha, beta, not maximizing_player)
+                    scr_local, _ = self.alphabeta(game.forecast_move(m), depth - 1, alpha, beta, False)
                     if scr_local >= scr:
                         scr = scr_local
                         mv = m
-                    alpha = max(alpha, scr)
-                    if scr >= beta:
-                        break
+
+                        if scr >= beta:
+                            break
+                        alpha = max(alpha, scr)
+
             else:
                 scr = float('inf')
                 for m in legal_moves:
                     mv = m
-                    scr_local, _ = self.alphabeta(game.forecast_move(m), depth - 1, alpha, beta, not maximizing_player)
-                    if scr <= scr_local:
+                    scr_local, _ = self.alphabeta(game.forecast_move(m), depth - 1, alpha, beta, True)
+                    if scr >= scr_local:
                         scr = scr_local
                         mv = m
-                    beta = min(beta, scr)
-                    if scr <= alpha:
-                        break
+
+                        if scr <= alpha:
+                            break
+                        beta = min(beta, scr)
+
         return scr, mv
