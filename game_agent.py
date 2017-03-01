@@ -122,20 +122,33 @@ class CustomPlayer:
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
+        if len(legal_moves) == 0:
+            invalid = (-1, -1)
+            return invalid
 
+        mv = (-1, -1)
+        depth = 1
         try:
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            pass
+            while depth <= self.search_depth or self.search_depth < 0:
+                if self.method == 'minimax':
+                    _, mv1 = self.minimax(game, depth, True)
+                else:
+                    _, mv1 = self.alphabeta(game, depth)
+                # if mv1 == mv:
+                #     break
+                mv = mv1
 
+                depth += 1
         except Timeout:
             # Handle any actions required at timeout, if necessary
             pass
 
         # Return the best move from the last completed search iteration
-        raise NotImplementedError
+        return mv
 
     def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
@@ -171,7 +184,16 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
+        if game.is_winner(game.active_player):
+            return 1, (-1, -1)
+
+        if game.is_loser(game.active_player):
+            return -1, (-1, -1)
+
         legal_moves = game.get_legal_moves(game.active_player)
+        if len(legal_moves) == 0:
+            return -1, (-1, -1)
+
         if depth == 1:
             if maximizing_player:
                 scr, mv = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
@@ -230,7 +252,16 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
+        if game.is_winner(game.active_player):
+            return 1, (-1, -1)
+
+        if game.is_loser(game.active_player):
+            return -1, (-1, -1)
+
+        mv = None
         legal_moves = game.get_legal_moves(game.active_player)
+        if len(legal_moves) == 0:
+            return -1, (-1, -1)
         if depth == 0:
             mv = game.get_player_location(game.active_player)
             scr = self.score(game, game.active_player)
@@ -242,7 +273,6 @@ class CustomPlayer:
                     if scr_local >= scr:
                         scr = scr_local
                         mv = m
-
                         if scr >= beta:
                             break
                         alpha = max(alpha, scr)
@@ -259,4 +289,6 @@ class CustomPlayer:
                             break
                         beta = min(beta, scr)
 
+        if mv is None:
+            print('We have a problem')
         return scr, mv
