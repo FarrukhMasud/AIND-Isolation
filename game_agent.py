@@ -231,11 +231,9 @@ class CustomPlayer:
             raise Timeout()
 
         legal_moves = game.get_legal_moves(game.active_player)
-        if depth == 1:
-            if maximizing_player:
-                scr, mv = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
-            else:
-                scr, mv = min([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
+        if depth == 0:
+            mv = game.get_player_location(game.active_player)
+            scr = self.score(game, game.active_player)
         else:
             if maximizing_player:
                 scr = float('-inf')
