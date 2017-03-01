@@ -36,8 +36,17 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    # TODO: finish this function!
-    raise NotImplementedError
+    p1 = player
+    p2 = game.inactive_player if game.active_player == player else game.inactive_player
+    p1_move_list = game.get_legal_moves(p1)
+    p2_move_list = game.get_legal_moves(p2)
+
+    if game.is_loser(p1) or len(p1_move_list) == 0:
+        return -100
+    if game.is_winner(p1) or len(p2_move_list) == 0:
+        return 100
+
+    return len(p1_move_list) - len(p2_move_list)
 
 
 class CustomPlayer:
@@ -117,7 +126,6 @@ class CustomPlayer:
 
         self.time_left = time_left
 
-        # TODO: finish this function!
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
@@ -125,8 +133,9 @@ class CustomPlayer:
         if len(legal_moves) == 0:
             invalid = (-1, -1)
             return invalid
-
-        mv = (-1, -1)
+        if game.get_player_location(game.active_player) is None:
+            return legal_moves[int(len(legal_moves) / 2)]
+        mv = legal_moves[0]
         depth = 1
         try:
             # The search method call (alpha beta or minimax) should happen in
@@ -135,12 +144,9 @@ class CustomPlayer:
             # when the timer gets close to expiring
             while depth <= self.search_depth or self.search_depth < 0:
                 if self.method == 'minimax':
-                    _, mv1 = self.minimax(game, depth, True)
+                    _, mv = self.minimax(game, depth, True)
                 else:
-                    _, mv1 = self.alphabeta(game, depth)
-                # if mv1 == mv:
-                #     break
-                mv = mv1
+                    _, mv = self.alphabeta(game, depth)
 
                 depth += 1
         except Timeout:
@@ -183,16 +189,15 @@ class CustomPlayer:
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
-
         if game.is_winner(game.active_player):
-            return 1, (-1, -1)
+            return float('inf') if maximizing_player else float('-inf'), game.get_player_location(game.active_player)
 
         if game.is_loser(game.active_player):
-            return -1, (-1, -1)
+            return float('-inf') if maximizing_player else float('inf'), game.get_player_location(game.active_player)
 
         legal_moves = game.get_legal_moves(game.active_player)
         if len(legal_moves) == 0:
-            return -1, (-1, -1)
+            return float('-inf') if maximizing_player else float('inf'), game.get_player_location(game.active_player)
 
         if depth == 1:
             if maximizing_player:
@@ -253,10 +258,10 @@ class CustomPlayer:
             raise Timeout()
 
         if game.is_winner(game.active_player):
-            return 1, (-1, -1)
+            return float('inf') if maximizing_player else float('-inf'), game.get_player_location(game.active_player)
 
         if game.is_loser(game.active_player):
-            return -1, (-1, -1)
+            return float('-inf') if maximizing_player else float('inf'), game.get_player_location(game.active_player)
 
         mv = None
         legal_moves = game.get_legal_moves(game.active_player)
