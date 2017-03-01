@@ -252,7 +252,6 @@ class CustomPlayer:
             else:
                 scr = float('inf')
                 for m in legal_moves:
-                    mv = m
                     scr_local, _ = self.alphabeta(game.forecast_move(m), depth - 1, alpha, beta, True)
                     if scr >= scr_local:
                         scr = scr_local
