@@ -46,7 +46,7 @@ def custom_score(game, player):
     if game.is_winner(p1) or len(p2_move_list) == 0:
         return 100
 
-    return len(p1_move_list) - len(p2_move_list)
+    return float(len(p1_move_list) - len(p2_move_list))
 
 
 class CustomPlayer:
@@ -126,17 +126,18 @@ class CustomPlayer:
 
         self.time_left = time_left
 
-
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
         if len(legal_moves) == 0:
             invalid = (-1, -1)
             return invalid
-        if game.get_player_location(game.active_player) is None:
+        if game.move_count<=1:
             return legal_moves[int(len(legal_moves) / 2)]
         mv = legal_moves[0]
         depth = 1
+        if not self.iterative:
+            depth = self.search_depth
         try:
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
@@ -146,7 +147,7 @@ class CustomPlayer:
                 if self.method == 'minimax':
                     _, mv = self.minimax(game, depth, True)
                 else:
-                    _, mv = self.alphabeta(game, depth)
+                    _, mv = self.alphabeta(game, depth, True)
 
                 depth += 1
         except Timeout:
@@ -266,7 +267,7 @@ class CustomPlayer:
         mv = None
         legal_moves = game.get_legal_moves(game.active_player)
         if len(legal_moves) == 0:
-            return -1, (-1, -1)
+            return float('-inf') if maximizing_player else float('inf'), game.get_player_location(game.active_player)
         if depth == 0:
             mv = game.get_player_location(game.active_player)
             scr = self.score(game, game.active_player)
