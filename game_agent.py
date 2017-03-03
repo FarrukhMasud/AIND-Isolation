@@ -13,6 +13,46 @@ class Timeout(Exception):
     pass
 
 
+def custom_score_improved(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    p1 = player
+    p2 = game.get_opponent(p1)
+    p1_move_list = game.get_legal_moves(p1)
+    p2_move_list = game.get_legal_moves(p2)
+    p1_moves = float(len(p1_move_list))
+    p2_moves = float(len(p2_move_list))
+
+    if game.is_loser(p1) or p1_moves == 0:
+        return float('-inf')
+    if game.is_winner(p1) or p2_moves == 0:
+        return float('inf')
+
+    x = 1 if sum([1 for p in p1_move_list for q in p2_move_list if p == q]) > 0 else 0
+
+    return p1_moves - x - p2_moves
+
+
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -40,8 +80,7 @@ def custom_score(game, player):
     p2 = game.get_opponent(p1)
     p1_move_list = game.get_legal_moves(p1)
     p2_move_list = game.get_legal_moves(p2)
-    open_move_list = game.get_blank_spaces()
-    open_moves = float(len(open_move_list))
+
     p1_moves = float(len(p1_move_list))
     p2_moves = float(len(p2_move_list))
 
@@ -50,15 +89,8 @@ def custom_score(game, player):
     if game.is_winner(p1) or p2_moves == 0:
         return float('inf')
 
-    for p in p1_move_list:
-        for q in p2_move_list:
-            x = abs(p[0] - q[0])
-            y = abs(p[1] - q[1])
-            if (x == 0 and y == 0) or (x == 2 and y == 1) or (y == 2 and x == 1):
-                p1_moves -= 1
-                break
+    return p1_moves + (1 / p2_moves)
 
-    return p1_moves - p2_moves
 
 
 class CustomPlayer:
@@ -91,8 +123,8 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=8, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=10.):
+    def __init__(self, search_depth=9, score_fn=custom_score,
+                 iterative=True, method='alphabeta', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn

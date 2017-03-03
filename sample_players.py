@@ -4,6 +4,8 @@ own agent and example heuristic functions.
 
 from random import randint
 
+from game_agent import CustomPlayer
+
 
 def null_score(game, player):
     """This heuristic presumes no knowledge for non-terminal states, and
@@ -229,30 +231,30 @@ if __name__ == "__main__":
     from isolation import Board
 
     # create an isolation board (by default 7x7)
-    player1 = RandomPlayer()
-    player2 = GreedyPlayer()
+    player1 = CustomPlayer()
+    player2 = CustomPlayer(score_fn=improved_score)
     game = Board(player1, player2)
 
     # place player 1 on the board at row 2, column 3, then place player 2 on
     # the board at row 0, column 5; display the resulting board state.  Note
     # that .apply_move() changes the calling object
-    game.apply_move((2, 3))
-    game.apply_move((0, 5))
+    game.apply_move((randint(0,6), randint(0,6)))
+    game.apply_move((randint(0,6), randint(0,6)))
     print(game.to_string())
 
     # players take turns moving on the board, so player1 should be next to move
-    assert(player1 == game.active_player)
+    # assert(player1 == game.active_player)
 
     # get a list of the legal moves available to the active player
-    print(game.get_legal_moves())
+    # print(game.get_legal_moves())
 
     # get a successor of the current state by making a copy of the board and
     # applying a move. Notice that this does NOT change the calling object
     # (unlike .apply_move()).
-    new_game = game.forecast_move((1, 1))
-    assert(new_game.to_string() != game.to_string())
-    print("\nOld state:\n{}".format(game.to_string()))
-    print("\nNew state:\n{}".format(new_game.to_string()))
+    # new_game = game.forecast_move((1, 1))
+    # assert(new_game.to_string() != game.to_string())
+    # print("\nOld state:\n{}".format(game.to_string()))
+    # print("\nNew state:\n{}".format(new_game.to_string()))
 
     # play the remainder of the game automatically -- outcome can be "illegal
     # move" or "timeout"; it should _always_ be "illegal move" in this example
@@ -260,3 +262,6 @@ if __name__ == "__main__":
     print("\nWinner: {}\nOutcome: {}".format(winner, outcome))
     print(game.to_string())
     print("Move history:\n{!s}".format(history))
+    print(game.move_count)
+    str = "Player 1" if winner == player1 else "Player 2"
+    print(str + " WINS!!!!!")
