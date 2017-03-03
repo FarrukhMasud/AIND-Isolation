@@ -37,16 +37,28 @@ def custom_score(game, player):
     """
 
     p1 = player
-    p2 = game.inactive_player if game.active_player == player else game.inactive_player
+    p2 = game.get_opponent(p1)
     p1_move_list = game.get_legal_moves(p1)
     p2_move_list = game.get_legal_moves(p2)
+    open_move_list = game.get_blank_spaces()
+    open_moves = float(len(open_move_list))
+    p1_moves = float(len(p1_move_list))
+    p2_moves = float(len(p2_move_list))
 
-    if game.is_loser(p1) or len(p1_move_list) == 0:
-        return -100
-    if game.is_winner(p1) or len(p2_move_list) == 0:
-        return 100
+    if game.is_loser(p1) or p1_moves == 0:
+        return float('-inf')
+    if game.is_winner(p1) or p2_moves == 0:
+        return float('inf')
 
-    return float(len(p1_move_list) - len(p2_move_list))
+    for p in p1_move_list:
+        for q in p2_move_list:
+            x = abs(p[0] - q[0])
+            y = abs(p[1] - q[1])
+            if (x == 0 and y == 0) or (x == 2 and y == 1) or (y == 2 and x == 1):
+                p1_moves -= 1
+                break
+
+    return p1_moves - p2_moves
 
 
 class CustomPlayer:
@@ -79,7 +91,7 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=custom_score,
+    def __init__(self, search_depth=8, score_fn=custom_score,
                  iterative=True, method='minimax', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
@@ -132,7 +144,7 @@ class CustomPlayer:
         if len(legal_moves) == 0:
             invalid = (-1, -1)
             return invalid
-        if game.move_count<=1:
+        if game.move_count <= 1:
             return legal_moves[int(len(legal_moves) / 2)]
         mv = legal_moves[0]
         depth = 1
@@ -190,11 +202,11 @@ class CustomPlayer:
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
-        if game.is_winner(game.active_player):
-            return float('inf') if maximizing_player else float('-inf'), game.get_player_location(game.active_player)
-
-        if game.is_loser(game.active_player):
-            return float('-inf') if maximizing_player else float('inf'), game.get_player_location(game.active_player)
+        # if game.is_winner(game.active_player):
+        #     return float('inf') if maximizing_player else float('-inf'), game.get_player_location(game.active_player)
+        #
+        # if game.is_loser(game.active_player):
+        #     return float('-inf') if maximizing_player else float('inf'), game.get_player_location(game.active_player)
 
         legal_moves = game.get_legal_moves(game.active_player)
         if len(legal_moves) == 0:
@@ -257,12 +269,12 @@ class CustomPlayer:
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
-
-        if game.is_winner(game.active_player):
-            return float('inf') if maximizing_player else float('-inf'), game.get_player_location(game.active_player)
-
-        if game.is_loser(game.active_player):
-            return float('-inf') if maximizing_player else float('inf'), game.get_player_location(game.active_player)
+        #
+        # if game.is_winner(game.active_player):
+        #     return float('inf') if maximizing_player else float('-inf'), game.get_player_location(game.active_player)
+        #
+        # if game.is_loser(game.active_player):
+        #     return float('-inf') if maximizing_player else float('inf'), game.get_player_location(game.active_player)
 
         mv = None
         legal_moves = game.get_legal_moves(game.active_player)
